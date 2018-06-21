@@ -1,43 +1,49 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-
-
 import tensorflow as tf
 
+
 learning_rate = 0.01
+
+#设置训练的步数
 trainnig_epochs = 40
+
 rng = np.random.RandomState(1)
 
 def fun(x):
     a0,a1,a2,a3,e = 0.1,-0.02,0.03,-0.04,0.05
     y = a0 + a1 * x + a2 * (x**2) + a3 * (x**3)+ e
+    #加一点噪声
     y += 0.03 * rng.rand(1)
     return y
+
 
 # 设置训练之前的值
 trX = np.linspace(-1, 1, 30)
 arrY = [fun(x) for x in trX]
+trY = np.array(arrY).reshape(-1, 1)
+# print("trY:", trY)
 
 #设置最高系数
 num_coeffs = 4
-trY = np.array(arrY).reshape(-1, 1)
 
 X = tf.placeholder("float32")
 Y = tf.placeholder("float32")
 
-#设置模型
+#设置模型  用于计算损失函数
 def model(X, w):
     terms = []
     for i in range(num_coeffs):
         term = tf.multiply(w[i], tf.pow(X, i))
         terms.append(term)
+    print("terms:",terms)
     return tf.add_n(terms)
 
-
+#定义w    shape=(4,)
 w = tf.Variable([0.]*num_coeffs,  name="parameters")
-print(w)
+print("W:",w)
 y_model = model(X, w)
+print("y_moled:",y_model)
 
 cost = tf.reduce_sum(tf.square(Y-y_model))
 train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize((cost))
@@ -60,6 +66,7 @@ plt.ylabel('y')
 plt.grid(True)
 plt.title("Poly regression")
 
+#原始数据
 plt.scatter(trX, trY)
 # plt.show()
 
@@ -68,6 +75,7 @@ trY2 = 0
 for i in range(num_coeffs):
     trY2 += w_val[i] * np.power(trX2, i)
 
+#拟合数据
 plt.plot(trX2, trY2, 'ro')
 plt.show()
 
